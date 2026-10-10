@@ -1,0 +1,2181 @@
+{
+ "slug": "heading-link-sync",
+ "module": "heading-link-sync/src/links",
+ "function": "rewrite",
+ "note": "args = [note text, {targets: link paths that point to the changed note (\"\" = the same note), before and after: its headings, blocks: block ID renames, markdown and blockLinks: Pro switches (default on)}]; expected = {text after the rewrite, edits: links changed, skipped: reasons for links left alone}. Heading matching is the same as the app (test/e2e/parity.e2e.ts).",
+ "cases": [
+  {
+   "name": "a wikilink follows a heading rename",
+   "args": [
+    "See [[Target#Setup]].",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "See [[Target#Setup guide]].",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "the alias stays",
+   "args": [
+    "See [[Target#Setup|the setup]].",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "See [[Target#Setup guide|the setup]].",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "an embed follows",
+   "args": [
+    "![[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "![[Target#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "an embed with a size or alias keeps it",
+   "args": [
+    "![[Target#Setup|300]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "![[Target#Setup guide|300]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link inside the same note follows",
+   "args": [
+    "Jump to [[#Setup]].",
+    {
+     "targets": [
+      "",
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "Jump to [[#Setup guide]].",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link inside another note to its own heading does not change",
+   "args": [
+    "Jump to [[#Setup]].",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "Jump to [[#Setup]].",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link with other letter case matches",
+   "args": [
+    "[[Target#setup]] and [[Target#SETUP]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Setup guide]] and [[Target#Setup guide]]",
+    "edits": 2,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link to another note with the same heading does not change",
+   "args": [
+    "[[Other#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Other#Setup]]",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link with a folder path matches when the path points to the note",
+   "args": [
+    "[[notes/Target#Setup]]",
+    {
+     "targets": [
+      "notes/Target",
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[notes/Target#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link to a heading that does not exist stays",
+   "args": [
+    "[[Target#Missing]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Missing]]",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link without a heading stays",
+   "args": [
+    "[[Target]] and [[Target|alias]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target]] and [[Target|alias]]",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a change of letter case only is not a rename",
+   "args": [
+    "[[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "SETUP",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Setup]]",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "link text uses the same special character rules as the app",
+   "args": [
+    "[[Target#Q&A what?]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Q&A: what?",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "FAQ: why?",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#FAQ why?]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a hash in the new heading becomes a space in the link",
+   "args": [
+    "[[Target#Notes]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "C# notes",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#C notes]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "double spaces in the new heading collapse",
+   "args": [
+    "[[Target#Notes]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Two  spaces",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Two spaces]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a nested link to the second of two same headings follows only that heading",
+   "args": [
+    "[[Target#Usage#Install]] [[Target#Install]] [[Target#Setup#Install]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Install",
+       "level": 3
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      },
+      {
+       "text": "Install",
+       "level": 3
+      }
+     ],
+     "after": [
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Install",
+       "level": 3
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      },
+      {
+       "text": "Install on Linux",
+       "level": 3
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Usage#Install on Linux]] [[Target#Install]] [[Target#Setup#Install]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a parent rename updates the parent part of a nested link",
+   "args": [
+    "[[Target#Usage#Install]] [[Target#Usage]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Install",
+       "level": 3
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      },
+      {
+       "text": "Install",
+       "level": 3
+      }
+     ],
+     "after": [
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Install",
+       "level": 3
+      },
+      {
+       "text": "Daily use",
+       "level": 2
+      },
+      {
+       "text": "Install",
+       "level": 3
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Daily use#Install]] [[Target#Daily use]]",
+    "edits": 2,
+    "skipped": []
+   }
+  },
+  {
+   "name": "links go to the first of two same headings, so renaming the first moves them",
+   "args": [
+    "[[Target#Notes]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Notes",
+       "level": 2
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Old notes",
+       "level": 2
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Old notes]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "renaming the second of two same headings leaves plain links alone",
+   "args": [
+    "[[Target#Notes]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Notes",
+       "level": 2
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Notes",
+       "level": 2
+      },
+      {
+       "text": "Draft",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Notes]]",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a rename that takes the text of a later heading keeps old links on their heading with a parent path",
+   "args": [
+    "[[Target#Draft]] [[Target#Notes]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Part A",
+       "level": 1
+      },
+      {
+       "text": "Draft",
+       "level": 2
+      },
+      {
+       "text": "Part B",
+       "level": 1
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Part A",
+       "level": 1
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      },
+      {
+       "text": "Part B",
+       "level": 1
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Notes]] [[Target#Part B#Notes]]",
+    "edits": 2,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link that no path can keep on its heading is left alone and reported",
+   "args": [
+    "[[Target#Notes]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Draft",
+       "level": 2
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Notes",
+       "level": 2
+      },
+      {
+       "text": "Notes",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Notes]]",
+    "edits": 0,
+    "skipped": [
+     "ambiguous"
+    ]
+   }
+  },
+  {
+   "name": "links in a fenced code block stay",
+   "args": [
+    "```\n[[Target#Setup]]\n```\n[[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "```\n[[Target#Setup]]\n```\n[[Target#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "links in a tilde fence with a language stay",
+   "args": [
+    "~~~~md\n[[Target#Setup]]\n~~~~\n[[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "~~~~md\n[[Target#Setup]]\n~~~~\n[[Target#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a fence in a list item and in a quote",
+   "args": [
+    "- ```\n  [[Target#Setup]]\n  ```\n> ```\n> [[Target#Setup]]\n> ```",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "- ```\n  [[Target#Setup]]\n  ```\n> ```\n> [[Target#Setup]]\n> ```",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "an unclosed fence protects the rest of the note",
+   "args": [
+    "[[Target#Setup]]\n```\n[[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Setup guide]]\n```\n[[Target#Setup]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "links in inline code stay",
+   "args": [
+    "`[[Target#Setup]]` and ``a ` [[Target#Setup]]`` and [[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "`[[Target#Setup]]` and ``a ` [[Target#Setup]]`` and [[Target#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a single backtick does not hide the rest of the note",
+   "args": [
+    "it`s [[Target#Setup]]\n\nnext [[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "it`s [[Target#Setup guide]]\n\nnext [[Target#Setup guide]]",
+    "edits": 2,
+    "skipped": []
+   }
+  },
+  {
+   "name": "links in a math block stay",
+   "args": [
+    "$$\n[[Target#Setup]]\n$$\n[[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "$$\n[[Target#Setup]]\n$$\n[[Target#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "links in comments, quotes, lists and callouts follow",
+   "args": [
+    "%% [[Target#Setup]] %%\n> [[Target#Setup]]\n- [[Target#Setup]]\n> [!note]\n> [[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "%% [[Target#Setup guide]] %%\n> [[Target#Setup guide]]\n- [[Target#Setup guide]]\n> [!note]\n> [[Target#Setup guide]]",
+    "edits": 4,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link in a table with an escaped pipe keeps the escape",
+   "args": [
+    "| a | [[Target#Setup\\|setup]] |",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "| a | [[Target#Setup guide\\|setup]] |",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "frontmatter links follow",
+   "args": [
+    "---\nup: \"[[Target#Setup]]\"\nrel:\n  - \"[[Target#Setup|s]]\"\n---\nBody [[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "---\nup: \"[[Target#Setup guide]]\"\nrel:\n  - \"[[Target#Setup guide|s]]\"\n---\nBody [[Target#Setup guide]]",
+    "edits": 3,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a quote in the new heading is not written into frontmatter",
+   "args": [
+    "---\nup: \"[[Target#Setup]]\"\n---\n[[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Say \"hi\"",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "---\nup: \"[[Target#Setup]]\"\n---\n[[Target#Say \"hi\"]]",
+    "edits": 1,
+    "skipped": [
+     "frontmatter-quote"
+    ]
+   }
+  },
+  {
+   "name": "Markdown link text in frontmatter is not a link",
+   "args": [
+    "---\nnote: \"[s](Target.md#Setup)\"\n---\n",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "---\nnote: \"[s](Target.md#Setup)\"\n---\n",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a Markdown link gets %20 for spaces",
+   "args": [
+    "[s](Target.md#Setup)",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](Target.md#Setup%20guide)",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a Markdown link with encoded spaces follows",
+   "args": [
+    "[s](Target.md#Old%20name)",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Old name",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "New name",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](Target.md#New%20name)",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a Markdown link in angle brackets keeps raw spaces",
+   "args": [
+    "[s](<Target.md#Old name>)",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Old name",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "New name",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](<Target.md#New name>)",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a fully encoded Markdown link stays fully encoded",
+   "args": [
+    "[s](Target.md#Caf%C3%A9%20notes)",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Café notes",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Thé notes",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](Target.md#Th%C3%A9%20notes)",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a Markdown link keeps its title",
+   "args": [
+    "[s](Target.md#Setup \"Read this\")",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](Target.md#Setup%20guide \"Read this\")",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a Markdown link without the extension and an image link follow",
+   "args": [
+    "[s](Target#Setup) ![i](Target.md#Setup)",
+    {
+     "targets": [
+      "Target",
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](Target#Setup%20guide) ![i](Target.md#Setup%20guide)",
+    "edits": 2,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a Markdown link inside the same note follows",
+   "args": [
+    "[up](#Setup)",
+    {
+     "targets": [
+      ""
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[up](#Setup%20guide)",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "balanced brackets stay raw in a Markdown link, like the app writes them",
+   "args": [
+    "[s](Target.md#Setup)",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup (v2)",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](Target.md#Setup%20(v2))",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "an unbalanced bracket is encoded so the link does not break",
+   "args": [
+    "[s](Target.md#Setup)",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Step 1)",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[s](Target.md#Step%201%29)",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "web links are never changed",
+   "args": [
+    "[x](https://example.com/Target.md#Setup)",
+    {
+     "targets": [
+      "Target.md",
+      "https://example.com/Target.md"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[x](https://example.com/Target.md#Setup)",
+    "edits": 0,
+    "skipped": []
+   }
+  },
+  {
+   "name": "without Pro, Markdown links are reported and not changed",
+   "args": [
+    "[s](Target.md#Setup) [[Target#Setup]]",
+    {
+     "targets": [
+      "Target.md",
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "markdown": false
+    }
+   ],
+   "expected": {
+    "text": "[s](Target.md#Setup) [[Target#Setup guide]]",
+    "edits": 1,
+    "skipped": [
+     "pro-markdown"
+    ]
+   }
+  },
+  {
+   "name": "a block ID rename updates links and embeds",
+   "args": [
+    "[[Target#^abc]] ![[Target#^abc|x]] [[Target#^other]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [],
+     "after": [],
+     "blocks": [
+      {
+       "from": "abc",
+       "to": "def"
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#^def]] ![[Target#^def|x]] [[Target#^other]]",
+    "edits": 2,
+    "skipped": []
+   }
+  },
+  {
+   "name": "block IDs match in any letter case",
+   "args": [
+    "[[Target#^ABC]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [],
+     "after": [],
+     "blocks": [
+      {
+       "from": "abc",
+       "to": "def"
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#^def]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a block ID in a Markdown link follows",
+   "args": [
+    "[b](Target.md#^abc)",
+    {
+     "targets": [
+      "Target.md"
+     ],
+     "before": [],
+     "after": [],
+     "blocks": [
+      {
+       "from": "abc",
+       "to": "new-id"
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[b](Target.md#^new-id)",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "without Pro, block ID links are reported and not changed",
+   "args": [
+    "[[Target#^abc]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [],
+     "after": [],
+     "blocks": [
+      {
+       "from": "abc",
+       "to": "def"
+      }
+     ],
+     "blockLinks": false
+    }
+   ],
+   "expected": {
+    "text": "[[Target#^abc]]",
+    "edits": 0,
+    "skipped": [
+     "pro-block"
+    ]
+   }
+  },
+  {
+   "name": "two renamed headings in one edit",
+   "args": [
+    "[[Target#Setup]] [[Target#Usage]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Install",
+       "level": 2
+      },
+      {
+       "text": "Use",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Install]] [[Target#Use]]",
+    "edits": 2,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a heading that is cleared waits and changes nothing",
+   "args": [
+    "[[Target#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "?",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Setup]]",
+    "edits": 0,
+    "skipped": [
+     "empty"
+    ]
+   }
+  },
+  {
+   "name": "a link to a deeper level path keeps the parts that did not change",
+   "args": [
+    "[[Target#Intro#Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Intro#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "empty parts in a path are dropped as the app does",
+   "args": [
+    "[[Target##Setup]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Setup guide]]",
+    "edits": 1,
+    "skipped": []
+   }
+  },
+  {
+   "name": "a link that the app reads to the first closing brackets",
+   "args": [
+    "[[Target#Setup [x]]]",
+    {
+     "targets": [
+      "Target"
+     ],
+     "before": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ],
+     "after": [
+      {
+       "text": "Intro",
+       "level": 1
+      },
+      {
+       "text": "Setup guide",
+       "level": 2
+      },
+      {
+       "text": "Usage",
+       "level": 2
+      }
+     ]
+    }
+   ],
+   "expected": {
+    "text": "[[Target#Setup [x]]]",
+    "edits": 0,
+    "skipped": []
+   }
+  }
+ ]
+}
