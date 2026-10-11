@@ -8,6 +8,11 @@
 	margin-bottom: var(--size-4-3);
 }
 
+.hls-more {
+	color: var(--text-warning);
+	font-weight: var(--font-semibold);
+}
+
 .hls-file {
 	margin-top: var(--size-4-2);
 	font-weight: var(--font-semibold);

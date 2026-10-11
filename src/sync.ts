@@ -16,6 +16,8 @@ import {
 	type Heading,
 	type Range,
 	type Skip,
+	type UndoRecord,
+	undoRecord,
 } from './links';
 import { isExcluded } from './settings';
 
@@ -41,6 +43,8 @@ export interface SyncRequest {
 export interface AppliedFile {
 	path: string;
 	edits: Edit[];
+	/** The note as it was written, so that undo finds the same links again. */
+	undo: UndoRecord;
 }
 
 const MAX_FILES = 5000;
@@ -111,28 +115,34 @@ export async function applyPlans(app: App, req: SyncRequest, plans: readonly Fil
 			const edits = text === plan.before ? plan.edits : planOne(app, req, plan.file, text, []).edits;
 			if (edits.length === 0) continue;
 			editor.transaction({ changes: edits.map((e) => ({ from: editor.offsetToPos(e.start), to: editor.offsetToPos(e.end), text: e.to })) });
-			done.push({ path: plan.file.path, edits });
+			done.push({ path: plan.file.path, edits, undo: undoRecord(editor.getValue(), edits) });
 			continue;
 		}
 		let used: Edit[] = [];
+		let undo = undoRecord('', []);
 		await app.vault.process(plan.file, (data) => {
 			if (data !== plan.before && plan.partial) return data;
 			used = data === plan.before ? plan.edits : planOne(app, req, plan.file, data, []).edits;
-			return applyEdits(data, used);
+			const written = applyEdits(data, used);
+			undo = undoRecord(written, used);
+			return written;
 		});
-		if (used.length) done.push({ path: plan.file.path, edits: used });
+		if (used.length) done.push({ path: plan.file.path, edits: used, undo });
 	}
 	return done;
 }
 
-/** Undoes an earlier apply. Returns how many files were restored and how many could not be. */
-export async function undoApplied(app: App, files: readonly AppliedFile[]): Promise<{ restored: number; failed: number }> {
+/**
+ * Undoes an earlier apply. Returns how many notes were restored, and the paths of the notes that were left
+ * as they are because a written link was not found again for certain.
+ */
+export async function undoApplied(app: App, files: readonly AppliedFile[]): Promise<{ restored: number; failed: string[] }> {
 	let restored = 0;
-	let failed = 0;
+	const failed: string[] = [];
 	for (const f of files) {
 		const file = app.vault.getFileByPath(f.path);
 		if (!file) {
-			failed++;
+			failed.push(f.path);
 			continue;
 		}
 		let ok = false;
@@ -141,7 +151,7 @@ export async function undoApplied(app: App, files: readonly AppliedFile[]): Prom
 			// The open note: change the editor, so unsaved typing is kept and the cursor stays.
 			const editor = view.editor;
 			const text = editor.getValue();
-			const back = revertEdits(text, f.edits);
+			const back = revertEdits(text, f.undo);
 			ok = back !== null;
 			if (back !== null) {
 				const d = diffSpan(text, back);
@@ -149,13 +159,13 @@ export async function undoApplied(app: App, files: readonly AppliedFile[]): Prom
 			}
 		} else {
 			await app.vault.process(file, (data) => {
-				const back = revertEdits(data, f.edits);
+				const back = revertEdits(data, f.undo);
 				ok = back !== null;
 				return back ?? data;
 			});
 		}
 		if (ok) restored++;
-		else failed++;
+		else failed.push(f.path);
 	}
 	return { restored, failed };
 }

@@ -15,7 +15,7 @@ export const SPONSORS: SponsorsConfig = {
 };
 
 export const PRO_UI = {
-	proSummary: 'Pro updates Markdown links and block ID links, shows every change before it is applied, and finds broken heading links with one-click fixes.',
+	proSummary: 'Pro updates Markdown links and block ID links, shows the changes before it applies them, and finds broken heading links with one-click fixes.',
 	priceText: 'Sponsor $5 a month, or $15 once. When you have paid $15 in total, Pro stays on.',
 };
 

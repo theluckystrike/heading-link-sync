@@ -2,9 +2,9 @@
 
 Heading Link Sync updates every link to a heading when you retype that heading in the editor. You do not open a menu and you see no dialog. Change `## Milestones` to `## Roadmap`, move the cursor off the line, and `[[Project Plan#Milestones]]` in every other note becomes `[[Project Plan#Roadmap]]`.
 
-Obsidian already has "Rename this heading" and "Rename block ID" in the editor menu, but they open a dialog first. When you type over a heading, the links to it break without a warning. Heading Link Sync closes exactly that gap.
+Obsidian already has "Rename this heading" and "Rename block ID" in the editor menu, but they open a dialog first. When you type over a heading, the links to it break without a warning.
 
-Heading sync for wikilinks and embeds is free. Pro adds Markdown links, block ID links, a preview of each change and a report of broken heading links. Pro costs $5 a month or $15 once, through GitHub Sponsors.
+Heading sync for wikilinks and embeds is free. Pro adds Markdown links, block ID links, a preview of the changes and a report of broken heading links. Pro costs $5 a month or $15 once, through GitHub Sponsors.
 
 ## Features
 
@@ -14,9 +14,9 @@ Heading sync for wikilinks and embeds is free. Pro adds Markdown links, block ID
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/rename-notice.png" alt="The plan note after a heading edit, with the notice Updated 36 links in 31 notes and an Undo button" width="720">
 
-Edit the heading as normal text. The plugin waits until you move the cursor off the heading line, or until you stop typing for 1.5 seconds. Then it updates the links and shows one notice, for example "Updated 36 links in 31 notes", with an Undo button.
+The plugin waits until you move the cursor off the heading line, or until you stop typing for 1.5 seconds. Then it updates the links and shows one notice, for example "Updated 36 links in 31 notes", with an Undo button.
 
-Undo puts back the exact text of every changed link, even if you edited other parts of those notes since. The command "Undo the last link update" does the same.
+Undo puts back the exact text of every changed link, also after you edited other text in those notes. If Undo cannot find a changed link for certain, it leaves that note as it is and the notice reports it. The command "Undo the last link update" does the same.
 
 ### Every wikilink form follows
 
@@ -50,11 +50,13 @@ Pro also updates `[text](Note.md#Heading)` links. It writes spaces as `%20`, as 
 
 Edit a `^block-id` at the end of a paragraph or under a table, and Pro updates every `[[Note#^block-id]]` link and embed to it. Block IDs match in any letter case, as in the app.
 
-### Preview every change (Pro)
+### Preview the changes (Pro)
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/preview.png" alt="A review dialog that lists each note and line with the old link crossed out, the new link, and a check box" width="720">
 
-With Pro, "Ask first" shows each change: the note, the line, the old link and the new link. Clear a check box to keep one link as it is, then select "Apply selected".
+With Pro, "Ask first" lists the changes: the note, the line, the old link and the new link. Clear a check box to keep one link as it is, then select "Apply selected".
+
+The list shows the first 500 changes. If there are more, a line above the buttons counts the links that are not shown, and "Apply selected" changes them too.
 
 ### Broken heading link report (Pro)
 
@@ -101,13 +103,13 @@ If a monthly sponsorship ends before you have paid $15 in total, Pro turns off a
 | Update Markdown links | On | On or off (Pro) |
 | Update block ID links | On | On or off (Pro) |
 
-Notes in an excluded folder are never changed, and heading edits in them do not update other notes. Use it for templates and archives.
+Notes in an excluded folder are never changed, and heading edits in them do not update other notes.
 
 ## FAQ
 
 ### How is this different from "Rename this heading"?
 
-The core command opens a dialog, and you must remember to use it before you edit. Heading Link Sync works on the edit that you already made. Both can live side by side: if you use the core dialog, the plugin sees that the links already point to the new text and does nothing.
+The core command opens a dialog, and you must remember to use it before you edit. Heading Link Sync works on the edit that you already made. If you use the core dialog, the plugin sees that the links already point to the new text and does nothing.
 
 ### What if I stop typing in the middle of a word?
 
@@ -119,7 +121,7 @@ No. It reads only the notes that the app lists as linking to the edited note, an
 
 ### What happens with two headings of the same text?
 
-When a note has two headings with the same text, a plain link goes to the first one. Heading Link Sync follows the same rule. If you rename the second heading, only nested links that point to it change. If a rename would send an old link to a different heading, the plugin adds the parent heading to the link, for example `[[Note#Part B#Notes]]`. If no such path exists, it leaves the link alone and says so.
+A plain link goes to the first heading. Heading Link Sync follows the same rule. If you rename the second heading, only nested links that point to it change. If a rename would send an old link to a different heading, the plugin adds the parent heading to the link, for example `[[Note#Part B#Notes]]`. If no such path exists, it leaves the link alone and says so.
 
 ### What does it leave alone?
 

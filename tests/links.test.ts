@@ -20,6 +20,8 @@ import {
 	stripHeading,
 	stripHeadingForLink,
 	suggestHeading,
+	textStamp,
+	undoRecord,
 	type Heading,
 } from '../src/links';
 
@@ -143,18 +145,102 @@ describe('applyEdits and revertEdits', () => {
 	const text = 'A [[T#Old]] B [[T#Old|x]] C';
 	const plan = planRewrite(text, { isTarget: () => true, before: [h('Old')], after: [h('New name')], markdown: true, blockLinks: true });
 	const changed = applyEdits(text, plan.edits);
+	const rec = undoRecord(changed, plan.edits);
 	it('applies and restores exactly', () => {
 		expect(changed).toBe('A [[T#New name]] B [[T#New name|x]] C');
-		expect(revertEdits(changed, plan.edits)).toBe(text);
+		expect(revertEdits(changed, rec)).toBe(text);
 	});
 	it('restores after other text in the note changed', () => {
-		expect(revertEdits(`Intro line\n${changed} more`, plan.edits)).toBe(`Intro line\n${text} more`);
+		expect(revertEdits(`Intro line\n${changed} more`, rec)).toBe(`Intro line\n${text} more`);
 	});
 	it('gives null when a changed link is gone', () => {
-		expect(revertEdits('A [[T#Something else]]', plan.edits)).toBeNull();
+		expect(revertEdits('A [[T#Something else]]', rec)).toBeNull();
 	});
 	it('refuses edits that do not match the text', () => {
 		expect(() => applyEdits('other text entirely', plan.edits)).toThrow();
+	});
+});
+
+describe('undo restores only the links that the update wrote', () => {
+	const opts = { isTarget: (p: string) => p === 'T' || p === 'T.md', before: [h('Old')], after: [h('New')], markdown: true, blockLinks: true };
+	/** Runs the forward path on a note. Gives the written text and the undo record. */
+	const write = (text: string, o: Parameters<typeof planRewrite>[1] = opts) => {
+		const plan = planRewrite(text, o);
+		const written = applyEdits(text, plan.edits);
+		return { written, edits: plan.edits.length, rec: undoRecord(written, plan.edits) };
+	};
+
+	it('unchanged note: restores by offset on the fast path', () => {
+		const text = 'The #New plan.\n```\n[[T#New]]\n```\n[[T#New]] and [[T#Old]] and [t](T.md#Old).';
+		const { written, edits, rec } = write(text);
+		expect(edits).toBe(2);
+		expect(written).toBe('The #New plan.\n```\n[[T#New]]\n```\n[[T#New]] and [[T#New]] and [t](T.md#New).');
+		expect(rec.stamp).toBe(textStamp(written));
+		expect(revertEdits(written, rec)).toBe(text);
+	});
+	it('unchanged note: the fast path does not need the parser, so a link that it cannot read is restored too', () => {
+		const text = 'See [[T#Old]].';
+		const { written, rec } = write(text, { ...opts, after: [h('a]b')] });
+		expect(written).toBe('See [[T#a]b]].');
+		expect(rec.edits[0]!.link).toBe('');
+		expect(revertEdits(written, rec)).toBe(text);
+		expect(revertEdits(`x ${written}`, rec)).toBeNull();
+	});
+	it('changed note: the new text as plain text before the link stays as it is', () => {
+		const text = 'The #New plan is in T#New.\nSee [[T#Old]].';
+		const { written, rec } = write(text);
+		expect(written).toBe('The #New plan is in T#New.\nSee [[T#New]].');
+		expect(revertEdits(`A new first line.\n${written}`, rec)).toBe(`A new first line.\n${text}`);
+	});
+	it('changed note: the same link in a fenced code block stays as it is', () => {
+		const text = 'Example:\n```md\n[[T#New]]\n```\nInline `[[T#New]]` too.\nSee [[T#Old]].';
+		const { written, rec } = write(text);
+		expect(written).toBe('Example:\n```md\n[[T#New]]\n```\nInline `[[T#New]]` too.\nSee [[T#New]].');
+		expect(revertEdits(`A new first line.\n${written}`, rec)).toBe(`A new first line.\n${text}`);
+	});
+	it('changed note: of two equal links, only the one that the update wrote is restored', () => {
+		const text = 'First [[T#New]], which the update did not write.\nThen [[T#Old]].';
+		const { written, edits, rec } = write(text);
+		expect(edits).toBe(1);
+		expect(written).toBe('First [[T#New]], which the update did not write.\nThen [[T#New]].');
+		expect(rec.edits[0]).toMatchObject({ link: '[[T#New]]', nth: 1, of: 2 });
+		expect(revertEdits(`A new first line.\n${written}`, rec)).toBe(`A new first line.\n${text}`);
+	});
+	it('changed note: a link with the same heading in another note stays as it is', () => {
+		const text = 'See [[Other#New]] and [[T#Old|the plan]].';
+		const { written, rec } = write(text);
+		expect(written).toBe('See [[Other#New]] and [[T#New|the plan]].');
+		expect(revertEdits(`${written} More text.`, rec)).toBe(`${text} More text.`);
+		expect(revertEdits('See [[Other#New]] and more text.', rec)).toBeNull();
+	});
+	it('changed note: finds Markdown links, embeds and property links again', () => {
+		const text = '---\nrel: "[[T#Old]]"\n---\nBody [t](T.md#Old) and ![[T#Old]] and [u](<T.md#Old>).';
+		const { written, edits, rec } = write(text);
+		expect(edits).toBe(4);
+		expect(revertEdits(`${written}\nA new last line with #New in it.`, rec)).toBe(`${text}\nA new last line with #New in it.`);
+	});
+	it('changed note: gives null when the count of equal links changed, so the written one is not certain', () => {
+		const text = '- [[T#Old]]\n- [[T#New]]\n';
+		const { written, rec } = write(text);
+		expect(written).toBe('- [[T#New]]\n- [[T#New]]\n');
+		// The written line is deleted: the other link is now at the same offset, but the update did not write it.
+		expect(revertEdits('- [[T#New]]\n', rec)).toBeNull();
+		expect(revertEdits(`${written}- [[T#New]]\n`, rec)).toBeNull();
+	});
+	it('changed note: gives null when the written link is now in a code block', () => {
+		const { written, rec } = write('See [[T#Old]].');
+		expect(revertEdits(`\`\`\`\n${written}\n\`\`\``, rec)).toBeNull();
+	});
+	it('changed note: restores all links or none', () => {
+		const text = 'One [[T#Old]].\nTwo ![[T#Old]].';
+		const { written, rec } = write(text);
+		expect(revertEdits(`Top.\n${written}`, rec)).toBe(`Top.\n${text}`);
+		expect(revertEdits('Top.\nOne [[T#New]].\nTwo is gone.', rec)).toBeNull();
+	});
+	it('changed note: follows links that moved in the note', () => {
+		const text = 'One [[T#Old|a]].\nTwo [[T#Old|b]].';
+		const { rec } = write(text);
+		expect(revertEdits('Two [[T#New|b]].\nOne [[T#New|a]].', rec)).toBe('Two [[T#Old|b]].\nOne [[T#Old|a]].');
 	});
 });
 

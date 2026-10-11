@@ -9,6 +9,8 @@ import { applyPlans, findBroken, fixBroken, planVault, undoApplied, type Applied
 import { HeadingWatcher, type Snapshot } from './watch';
 
 const NOTICE_MS = 10_000;
+/** How many note names the undo notice lists. */
+const MAX_NAMES = 5;
 /** How often a signed-in user's sponsorship is checked again (the manager decides if a request is due). */
 const PRO_TICK_MS = 60 * 60 * 1000;
 
@@ -164,7 +166,7 @@ export default class HeadingLinkSyncPlugin extends Plugin {
 		this.lastApplied = [];
 		if (files.length === 0) return;
 		const { restored, failed } = await undoApplied(this.app, files);
-		new Notice(failed ? `Restored links in ${restored} notes. ${failed} notes changed too much to restore.` : `Restored links in ${restored} notes.`);
+		new Notice(undoText(restored, failed), failed.length ? NOTICE_MS : undefined);
 	}
 
 	/** Pro: the broken link report. The command guards it with guardSponsorsPro. */
@@ -177,6 +179,15 @@ export default class HeadingLinkSyncPlugin extends Plugin {
 			(b) => void this.app.workspace.getLeaf(false).openFile(b.source, { eState: { line: Math.max(0, b.line) } }),
 		).open();
 	}
+}
+
+/** What the undo did, with the names of the notes that it left as they are. */
+export function undoText(restored: number, failed: readonly string[]): string {
+	const done = `Restored links in ${restored} notes.`;
+	if (failed.length === 0) return done;
+	const one = failed.length === 1;
+	const more = failed.length > MAX_NAMES ? ` and ${failed.length - MAX_NAMES} more` : '';
+	return `${done} ${failed.length} ${one ? 'note' : 'notes'} changed too much to restore and ${one ? 'was left as it is' : 'were left as they are'}: ${failed.slice(0, MAX_NAMES).join(', ')}${more}.`;
 }
 
 /** One sentence about links that were left alone. */
