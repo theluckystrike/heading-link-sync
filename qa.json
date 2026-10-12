@@ -78,5 +78,12 @@
 				"hold": 2400
 			}
 		]
+	},
+	{
+		"feature": "reference-counts",
+		"caption": "The editor shows the number of links beside the headings and block IDs that have links.",
+		"note": "Reference Counts.md",
+		"eval": "(async () => { const p = app.plugins.plugins['heading-link-sync']; p.settings.referenceCounts = true; p.settings.excludedFolders = 'Heading Link Sync/Templates'; await p.saveSettings(); p.pro.signOut(); await app.workspace.getLeaf(false).openFile(app.vault.getFileByPath('Heading Link Sync/Reference Counts.md'), { state: { mode: 'source', source: true } }); })()",
+		"wait": 2500
 	}
 ]

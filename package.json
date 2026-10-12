@@ -1,6 +1,6 @@
 {
 	"name": "heading-link-sync",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"private": true,
 	"description": "Updates every link and embed to a heading or block ID when you edit the heading text in the editor, with no rename dialog.",
 	"main": "main.js",
@@ -45,6 +45,8 @@
 		"vitest": "^5.0.3",
 		"wdio-obsidian-reporter": "^3.3.0",
 		"wdio-obsidian-service": "^3.3.0",
-		"webdriverio": "^9.32.0"
+		"webdriverio": "^9.32.0",
+		"@codemirror/state": "6.7.6",
+		"@codemirror/view": "6.43.13"
 	}
 }

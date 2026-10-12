@@ -1,10 +1,10 @@
 # Heading Link Sync
 
-Heading Link Sync updates every link to a heading when you retype that heading in the editor. You do not open a menu and you see no dialog. Change `## Milestones` to `## Roadmap`, move the cursor off the line, and `[[Project Plan#Milestones]]` in every other note becomes `[[Project Plan#Roadmap]]`.
+Heading Link Sync updates heading wikilinks when you retype a heading. Change `## Milestones` to `## Roadmap`, then leave the line. Links such as `[[Project Plan#Milestones]]` become `[[Project Plan#Roadmap]]`.
 
-Obsidian already has "Rename this heading" and "Rename block ID" in the editor menu, but they open a dialog first. When you type over a heading, the links to it break without a warning.
+The core heading and block rename commands open a dialog. Links do not follow a heading that you retype.
 
-Heading sync for wikilinks and embeds is free. Pro adds Markdown links, block ID links, a preview of the changes and a report of broken heading links. Pro costs $5 a month or $15 once, through GitHub Sponsors.
+Heading sync for wikilinks and embeds, and reference counts in the editor, are free. Pro adds Markdown links, block ID links, a preview of the changes and a report of broken heading links. Pro costs $5 a month or $15 once.
 
 ## Features
 
@@ -14,9 +14,9 @@ Heading sync for wikilinks and embeds is free. Pro adds Markdown links, block ID
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/rename-notice.png" alt="The plan note after a heading edit, with the notice Updated 36 links in 31 notes and an Undo button" width="720">
 
-The plugin waits until you move the cursor off the heading line, or until you stop typing for 1.5 seconds. Then it updates the links and shows one notice, for example "Updated 36 links in 31 notes", with an Undo button.
+Leave the heading line or stop typing for 1.5 seconds. The plugin updates the links and shows a count with an Undo button.
 
-Undo puts back the exact text of every changed link, also after you edited other text in those notes. If Undo cannot find a changed link for certain, it leaves that note as it is and the notice reports it. The command "Undo the last link update" does the same.
+Undo restores changed links. If a link is no longer certain, Undo leaves that note alone and reports it. The command "Undo the last link update" does the same.
 
 ### Every wikilink form follows
 
@@ -31,6 +31,14 @@ These forms are updated in the free version:
 - wikilinks in properties, such as `related: "[[Note#Heading]]"`
 
 Links in tables keep their escaped pipe. Links in fenced code, inline code and math blocks never change. The plugin finds the same links as the app does, and it compares heading text the same way: case and special characters such as `:` or `?` do not matter.
+
+### Reference counts in the editor
+
+<img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/reference-counts.png" alt="A note with link counts beside its headings and block IDs" width="720">
+
+A number beside a heading or block ID shows how many links point to it. The count includes wikilinks, Markdown links, embeds, property links and links inside the same note. Counts are per link. Unreferenced text has no number.
+
+Counts refresh after Obsidian indexes edits, renames or deletions. Old line positions clear while you type. A nested path counts for its last heading. A plain link to a duplicate heading counts for the first match, as it does in Obsidian. Broken subpaths and links from excluded folders do not count. Counts are free, including those for Markdown links and block IDs. Turn off "Show reference counts" to hide them.
 
 ### Ask first
 
@@ -83,20 +91,19 @@ The plugin acts only on edits that you make in the editor, not on changes from s
 
 ## Pro
 
-Pro unlocks Markdown links, block ID links, the preview and the broken link report. To get it:
+To enable Pro:
 
-1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike) with $5 a month, or $15 once. A total payment of $15 meets the payment requirement for Pro without further payment. Sign-in and the checks below still apply.
+1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike) with $5 a month, or $15 once.
 2. In Obsidian, open the settings of Heading Link Sync and select "Sign in with GitHub".
 3. The plugin copies a code and opens github.com/login/device. Paste the code there and approve.
 
-A negative sponsorship answer turns Pro off. The free heading sync keeps working.
-
 ## Settings
 
-<img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/settings.png" alt="Settings with the Pro section, the update mode, the pause, the excluded folders and the two Pro switches" width="720">
+<img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/settings.png" alt="Settings with the Pro section, the reference count switch, the update mode, the pause and excluded folders" width="720">
 
 | Setting | Default | Allowed values |
 | --- | --- | --- |
+| Show reference counts | On | On or off |
 | When a heading changes | Update links at once | Update links at once, or Ask first |
 | Pause before an update | 1500 | 500 to 5000 milliseconds |
 | Excluded folders | empty | One folder per line |
@@ -109,7 +116,7 @@ Notes in an excluded folder are never changed, and heading edits in them do not 
 
 ### How is this different from "Rename this heading"?
 
-The core command opens a dialog, and you must remember to use it before you edit. Heading Link Sync works on the edit that you already made. If you use the core dialog, the plugin sees that the links already point to the new text and does nothing.
+The core command opens a dialog before the edit. This plugin follows typing. If you use the core dialog, links already point to the new text.
 
 ### What if I stop typing in the middle of a word?
 
@@ -117,7 +124,7 @@ The links follow the half-typed text, then follow again when you finish. Raise t
 
 ### Does it change notes that do not link to the heading?
 
-No. It reads only the notes that the app lists as linking to the edited note, and it writes only the changed part of each link.
+It reads the edited note and its linking notes, and writes only the changed part of each link.
 
 ### What happens with two headings of the same text?
 
@@ -125,7 +132,7 @@ A plain link goes to the first heading. Heading Link Sync follows the same rule.
 
 ### What does it leave alone?
 
-Links in code and math, links to a heading that does not exist, links that would point to another heading after the rename, and links in properties when the new text contains a quote mark. The notice counts each of them.
+Links in code and math, links to a heading that does not exist, links with no safe path after the rename, and property links when the new text contains a quote mark.
 
 ## Payment, account and network
 
@@ -151,7 +158,7 @@ npm run build
 npm test
 ```
 
-The tests check 53 golden cases for the link rules. An end-to-end test types a new heading in Obsidian and checks the text of 31 linking notes.
+The tests check 59 golden cases for link rules and reference counts. An end-to-end test types a new heading in Obsidian and checks the text of 31 linking notes.
 
 ## License
 

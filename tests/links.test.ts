@@ -12,6 +12,7 @@ import {
 	pathTo,
 	planRewrite,
 	resolveHeadingPath,
+	referenceCounts,
 	revertEdits,
 	rewrite,
 	safeDecode,
@@ -30,6 +31,11 @@ const h = (text: string, level = 2): Heading => ({ text, level });
 describe('golden vectors (packages/spec/vectors/heading-link-sync.json)', () => {
 	for (const c of vectors.cases) {
 		it(c.name, () => {
+			if ('function' in c && c.function === 'referenceCounts') {
+				const [headings, blocks, subpaths] = c.args as Parameters<typeof referenceCounts>;
+				expect(referenceCounts(headings, blocks, subpaths)).toEqual(c.expected);
+				return;
+			}
 			const [text, spec] = c.args as [string, Parameters<typeof rewrite>[1]];
 			expect(rewrite(text, spec)).toEqual(c.expected);
 		});

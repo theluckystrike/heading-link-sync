@@ -1,5 +1,11 @@
 # heading-link-sync
 
+## 1.1.0
+
+### Minor Changes
+
+- de83496: Show free reference counts beside headings and block IDs in the editor.
+
 ## 1.0.2
 
 ### Patch Changes

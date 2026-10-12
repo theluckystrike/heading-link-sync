@@ -2,7 +2,7 @@
  "slug": "heading-link-sync",
  "module": "heading-link-sync/src/links",
  "function": "rewrite",
- "note": "args = [note text, {targets: link paths that point to the changed note (\"\" = the same note), before and after: its headings, blocks: block ID renames, markdown and blockLinks: Pro switches (default on)}]; expected = {text after the rewrite, edits: links changed, skipped: reasons for links left alone}. Heading matching is the same as the app (test/e2e/parity.e2e.ts).",
+ "note": "args = [note text, {targets: link paths that point to the changed note (\"\" = the same note), before and after: its headings, blocks: block ID renames, markdown and blockLinks: Pro switches (default on)}]; expected = {text after the rewrite, edits: links changed, skipped: reasons for links left alone}. Heading matching is the same as the app (test/e2e/parity.e2e.ts). Cases with function referenceCounts count heading and block references from resolved subpaths.",
  "cases": [
   {
    "name": "a wikilink follows a heading rename",
@@ -2175,6 +2175,202 @@
     "text": "[[Target#Setup [x]]]",
     "edits": 0,
     "skipped": []
+   }
+  },
+  {
+   "name": "reference counts choose the first of the same headings",
+   "function": "referenceCounts",
+   "args": [
+    [
+     {
+      "text": "A",
+      "level": 1
+     },
+     {
+      "text": "Notes",
+      "level": 2
+     },
+     {
+      "text": "B",
+      "level": 1
+     },
+     {
+      "text": "Notes",
+      "level": 2
+     }
+    ],
+    [],
+    [
+     "#Notes",
+     "#B#Notes",
+     "#A#Notes",
+     "#Missing",
+     ""
+    ]
+   ],
+   "expected": {
+    "headings": [
+     0,
+     2,
+     0,
+     1
+    ],
+    "blocks": []
+   }
+  },
+  {
+   "name": "reference counts match heading letter case and special characters",
+   "function": "referenceCounts",
+   "args": [
+    [
+     {
+      "text": "Q&A: café?",
+      "level": 2
+     }
+    ],
+    [],
+    [
+     "#q&a café",
+     "#Q&A: café?"
+    ]
+   ],
+   "expected": {
+    "headings": [
+     2
+    ],
+    "blocks": []
+   }
+  },
+  {
+   "name": "reference counts match block IDs and ignore broken block paths",
+   "function": "referenceCounts",
+   "args": [
+    [],
+    [
+     "abc",
+     "xyz"
+    ],
+    [
+     "#^ABC",
+     "#^abc",
+     "#^xyz",
+     "#^missing",
+     "#^abc#extra"
+    ]
+   ],
+   "expected": {
+    "headings": [],
+    "blocks": [
+     2,
+     1
+    ]
+   }
+  },
+  {
+   "name": "reference counts count only the end of a nested path",
+   "function": "referenceCounts",
+   "args": [
+    [
+     {
+      "text": "A",
+      "level": 1
+     },
+     {
+      "text": "Notes",
+      "level": 2
+     },
+     {
+      "text": "B",
+      "level": 1
+     },
+     {
+      "text": "Notes",
+      "level": 2
+     }
+    ],
+    [],
+    [
+     "#A#Notes",
+     "#B#Notes"
+    ]
+   ],
+   "expected": {
+    "headings": [
+     0,
+     1,
+     0,
+     1
+    ],
+    "blocks": []
+   }
+  },
+  {
+   "name": "reference counts keep zero for unreferenced headings and blocks",
+   "function": "referenceCounts",
+   "args": [
+    [
+     {
+      "text": "A",
+      "level": 1
+     },
+     {
+      "text": "Notes",
+      "level": 2
+     },
+     {
+      "text": "B",
+      "level": 1
+     },
+     {
+      "text": "Notes",
+      "level": 2
+     }
+    ],
+    [
+     "abc"
+    ],
+    []
+   ],
+   "expected": {
+    "headings": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "blocks": [
+     0
+    ]
+   }
+  },
+  {
+   "name": "reference counts ignore paths to missing or empty headings",
+   "function": "referenceCounts",
+   "args": [
+    [
+     {
+      "text": "?",
+      "level": 2
+     },
+     {
+      "text": "Setup",
+      "level": 2
+     }
+    ],
+    [],
+    [
+     "",
+     "#Missing",
+     "#Setup#Missing",
+     "#?"
+    ]
+   ],
+   "expected": {
+    "headings": [
+     0,
+     0
+    ],
+    "blocks": []
    }
   }
  ]

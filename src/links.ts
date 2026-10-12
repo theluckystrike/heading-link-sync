@@ -664,3 +664,22 @@ export function rewrite(
 	});
 	return { text: applyEdits(text, plan.edits), edits: plan.edits.length, skipped: plan.skipped.map((s) => s.reason) };
 }
+
+/** Counts links to each heading and block ID. Broken paths do not count. */
+export function referenceCounts(headings: readonly Heading[], blocks: readonly string[], subpaths: readonly string[]): { headings: number[]; blocks: number[] } {
+	const counts = { headings: headings.map(() => 0), blocks: blocks.map(() => 0) };
+	const ids = blocks.map((id) => id.toLowerCase());
+	for (const subpath of subpaths) {
+		const parts = splitSubpath(subpath);
+		if (parts[0]?.startsWith('^')) {
+			if (parts.length !== 1) continue;
+			const at = ids.indexOf(parts[0].slice(1).trim().toLowerCase());
+			if (at >= 0) counts.blocks[at]!++;
+		} else {
+			if (parts.some((part) => headingKey(part) === '')) continue;
+			const at = resolveHeadingPath(headings, parts);
+			if (at >= 0) counts.headings[at]!++;
+		}
+	}
+	return counts;
+}

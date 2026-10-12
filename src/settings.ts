@@ -6,6 +6,8 @@ import type HeadingLinkSyncPlugin from './main';
 export type SyncMode = 'auto' | 'ask';
 
 export interface HeadingLinkSyncSettings {
+	/** Show the number of links beside headings and block IDs in the editor. */
+	referenceCounts: boolean;
 	/** auto: update links at once and show a notice with Undo. ask: ask before each update. */
 	mode: SyncMode;
 	/** Pause in ms after the last key press before a heading edit counts as done. */
@@ -22,6 +24,7 @@ export const DELAY_MIN = 500;
 export const DELAY_MAX = 5000;
 
 export const DEFAULT_SETTINGS: HeadingLinkSyncSettings = {
+	referenceCounts: true,
 	mode: 'auto',
 	delayMs: 1500,
 	excludedFolders: '',
@@ -34,6 +37,7 @@ export function normalizeSettings(saved: Partial<HeadingLinkSyncSettings> | null
 	const s = saved ?? {};
 	const delay = typeof s.delayMs === 'number' && Number.isFinite(s.delayMs) ? Math.round(s.delayMs) : DEFAULT_SETTINGS.delayMs;
 	return {
+		referenceCounts: typeof s.referenceCounts === 'boolean' ? s.referenceCounts : DEFAULT_SETTINGS.referenceCounts,
 		mode: s.mode === 'ask' || s.mode === 'auto' ? s.mode : DEFAULT_SETTINGS.mode,
 		delayMs: Math.min(DELAY_MAX, Math.max(DELAY_MIN, delay)),
 		excludedFolders: typeof s.excludedFolders === 'string' ? s.excludedFolders : DEFAULT_SETTINGS.excludedFolders,
@@ -67,6 +71,11 @@ export class HeadingLinkSyncSettingTab extends PluginSettingTab {
 		return [
 			...(this.plugin.pro ? sponsorsSettingItems(this.plugin.pro, PRO_UI) : []),
 			{
+				name: 'Show reference counts',
+				desc: 'Show the number of links beside each referenced heading or block ID in the editor.',
+				control: { type: 'toggle', key: 'referenceCounts', defaultValue: DEFAULT_SETTINGS.referenceCounts },
+			},
+			{
 				name: 'When a heading changes',
 				desc: 'Update links at once and show a notice with an undo button, or ask first.',
 				control: { type: 'dropdown', key: 'mode', defaultValue: DEFAULT_SETTINGS.mode, options: { auto: 'Update links at once', ask: 'Ask first' } },
@@ -97,5 +106,7 @@ export class HeadingLinkSyncSettingTab extends PluginSettingTab {
 	async setControlValue(key: string, value: unknown): Promise<void> {
 		await super.setControlValue(key, value);
 		this.plugin.settings = normalizeSettings(this.plugin.settings);
+		// saveSettings also refreshes the reference counts in open editors.
+		await this.plugin.saveSettings();
 	}
 }

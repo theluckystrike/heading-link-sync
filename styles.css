@@ -55,3 +55,13 @@
 .hls-undo {
 	margin-left: var(--size-4-2);
 }
+
+.hls-reference-cell {
+	padding: 0 var(--size-2-2);
+	color: var(--text-accent);
+	font-variant-numeric: tabular-nums;
+}
+
+.hls-reference-count {
+	font-size: var(--font-smallest);
+}

@@ -7,6 +7,7 @@ import { bindPro, isPro, onProChange, SPONSORS } from './pro';
 import { DEFAULT_SETTINGS, excludedList, HeadingLinkSyncSettingTab, isExcluded, normalizeSettings, type HeadingLinkSyncSettings } from './settings';
 import { applyPlans, findBroken, fixBroken, planVault, undoApplied, type AppliedFile, type FilePlan, type SyncRequest } from './sync';
 import { HeadingWatcher, type Snapshot } from './watch';
+import { referenceGutter } from './reference-gutter';
 
 const NOTICE_MS = 10_000;
 /** How many note names the undo notice lists. */
@@ -30,6 +31,7 @@ export default class HeadingLinkSyncPlugin extends Plugin {
 	/** GitHub Sponsors Pro state. Created in onload; null before that. */
 	pro: SponsorsManager | null = null;
 	private settingTab: HeadingLinkSyncSettingTab | null = null;
+	private refreshReferences: (() => void) | null = null;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -54,6 +56,20 @@ export default class HeadingLinkSyncPlugin extends Plugin {
 			(path) => isExcluded(path, excludedList(this.settings)),
 			(file, before, after) => this.sync(file, before, after),
 		);
+		const references = referenceGutter(this.app, () => excludedList(this.settings), () => this.settings.referenceCounts);
+		this.registerEditorExtension(references.extension);
+		this.refreshReferences = references.refresh;
+		let referenceTimer: number | null = null;
+		const refresh = (): void => {
+			if (referenceTimer !== null) window.clearTimeout(referenceTimer);
+			referenceTimer = window.setTimeout(() => { referenceTimer = null; references.refresh(); }, 250);
+		};
+		this.register(() => { if (referenceTimer !== null) window.clearTimeout(referenceTimer); this.refreshReferences = null; });
+		this.registerEvent(this.app.metadataCache.on('changed', (file, data) => { references.indexed(file.path, data); refresh(); }));
+		this.registerEvent(this.app.metadataCache.on('resolved', refresh));
+		this.registerEvent(this.app.metadataCache.on('deleted', refresh));
+		this.registerEvent(this.app.vault.on('rename', refresh));
+		this.app.workspace.onLayoutReady(refresh);
 		watcher.start();
 		this.watcher = watcher;
 
@@ -89,6 +105,7 @@ export default class HeadingLinkSyncPlugin extends Plugin {
 
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
+		this.refreshReferences?.();
 	}
 
 	/** Builds the request for one finished heading or block ID edit, or null when there is nothing to do. */
