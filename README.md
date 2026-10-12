@@ -66,7 +66,7 @@ The command "Find broken heading and block links" lists every link whose note ex
 
 ## Install
 
-When Heading Link Sync is in the community directory, open Settings, then Community plugins, then Browse, and search for "Heading Link Sync". Select Install, then Enable.
+After the community listing goes live, open Settings, Community plugins, Browse. Search for "Heading Link Sync". Select Install, then Enable.
 
 To install by hand, download `main.js`, `manifest.json` and `styles.css` from the latest release. Put them in `<vault>/.obsidian/plugins/heading-link-sync/`. Reload the list of community plugins, then turn on Heading Link Sync.
 
@@ -85,11 +85,11 @@ The plugin acts only on edits that you make in the editor, not on changes from s
 
 Pro unlocks Markdown links, block ID links, the preview and the broken link report. To get it:
 
-1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike) with $5 a month, or $15 once. When you have paid $15 in total, Pro stays on.
+1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike) with $5 a month, or $15 once. A total payment of $15 meets the payment requirement for Pro without further payment. Sign-in and the checks below still apply.
 2. In Obsidian, open the settings of Heading Link Sync and select "Sign in with GitHub".
 3. The plugin copies a code and opens github.com/login/device. Paste the code there and approve.
 
-If a monthly sponsorship ends before you have paid $15 in total, Pro turns off at the next check, within 7 days. The free heading sync keeps working.
+A negative sponsorship answer turns Pro off. The free heading sync keeps working.
 
 ## Settings
 
@@ -129,19 +129,19 @@ Links in code and math, links to a heading that does not exist, links that would
 
 ## Payment, account and network
 
-The core features are free and stay free. Pro features need a GitHub Sponsors sponsorship of theluckystrike: $5 a month or more, or $15 once. When you have paid $15 in total, Pro stays on. Your notes stay readable and editable with or without Pro.
+The core features are free. Pro features need a GitHub Sponsors sponsorship of theluckystrike: $5 a month or more, or $15 once. A total payment of $15 meets the payment requirement for Pro without further payment. Sign-in and the checks below still apply. Your notes stay readable and editable with or without Pro.
 
 GitHub handles the payment. Sponsor at https://github.com/sponsors/theluckystrike. You need no account for the free features. Pro needs the GitHub account that sponsors.
 
-Until you select "Sign in with GitHub" in the settings, Heading Link Sync makes no network requests. Sign in uses the GitHub device flow. Heading Link Sync sends its public client ID and the scope `read:user` to `https://github.com/login/device/code` and shows you a code. While you enter the code at https://github.com/login/device, it asks `https://github.com/login/oauth/access_token` every few seconds whether sign in is done. The scope `read:user` is read-only access to your profile, which GitHub needs to show the sponsorship tier. It gives no access to repositories and no write access.
+Until you select "Sign in with GitHub" in the settings, Heading Link Sync makes no network requests. Sign in uses the GitHub device flow. Heading Link Sync sends its public client ID and the scope `read:user` to `https://github.com/login/device/code` and shows you a code. While you enter the code at https://github.com/login/device, it asks `https://github.com/login/oauth/access_token` every few seconds to check the sign-in status. The scope permits profile reads only. GitHub needs this access to show the sponsorship tier. It grants no repository scope and no write access.
 
-After sign in, Heading Link Sync sends one query to `https://api.github.com/graphql`: does the signed-in account sponsor theluckystrike, at which tier, and how much it has paid theluckystrike in total. It asks again at most once every 7 days, or when you select Refresh. It sends no note content, file names or other vault data, and it has no telemetry.
+After sign in, Heading Link Sync sends one query to `https://api.github.com/graphql`. It checks if the signed-in account sponsors theluckystrike. It asks for the tier and the total payment to theluckystrike. The plugin reuses a successful check for 7 days. Failed checks can retry after 6 hours. Select Refresh to request an earlier check. It sends no note content, file names or other vault data, and it has no telemetry.
 
-Pro keeps working for 14 days without a successful check. The GitHub token stays in the secret storage of Obsidian on this device. It is not written to data.json or other vault files, so it does not sync or reach a git repository. The local storage of this device keeps your GitHub login, the tier and the time of the last check. Sign out deletes the token. You can also revoke the access in your GitHub settings, under Applications.
+After a successful check, Pro can work offline for up to 14 days. Sign out or a negative sponsorship answer turns Pro off. The plugin stores the GitHub token through the secret storage API of Obsidian. It does not put the token in its saved settings or its local sponsorship data. The local storage of this device keeps your GitHub login, the tier and the time of the last check. Sign out clears the token. You can also revoke the access in your GitHub settings, under Applications.
 
 ## Support
 
-Report a bug or ask for a feature in the issue tracker of this repository. Include your Obsidian version, the old and new heading, and one link that did not update.
+Report bugs and feature requests in this repository's issue tracker. Include your Obsidian version, the old and new heading, and one link that did not update.
 
 To build from source:
 

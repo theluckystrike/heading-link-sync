@@ -1,6 +1,6 @@
 {
 	"name": "heading-link-sync",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"private": true,
 	"description": "Updates every link and embed to a heading or block ID when you edit the heading text in the editor, with no rename dialog.",
 	"main": "main.js",
