@@ -153,15 +153,19 @@ function backtickRun(text: string, at: number): number {
 
 /** Pushes inline code spans between from and to. A span ends at a run of the same length before a blank line. */
 function inlineCode(text: string, from: number, to: number, out: Range[]): void {
+	const para = /\n[ \t]*\r?\n/g;
+	// End of the paragraph of the last run. Found again only when a run starts after it, so a long paragraph is read once.
+	let limit = -1;
 	let i = from;
 	while (i < to) {
 		const b = text.indexOf('`', i);
 		if (b < 0 || b >= to) return;
 		const n = backtickRun(text, b);
-		const para = /\n[ \t]*\r?\n/g;
-		para.lastIndex = b;
-		const pm = para.exec(text);
-		const limit = Math.min(to, pm ? pm.index : to);
+		if (b >= limit) {
+			para.lastIndex = b;
+			const pm = para.exec(text);
+			limit = Math.min(to, pm ? pm.index : to);
+		}
 		let j = b + n;
 		let closed = -1;
 		while (j < limit) {
@@ -181,8 +185,29 @@ function inlineCode(text: string, from: number, to: number, out: Range[]): void 
 	}
 }
 
+/** Sorts the ranges and joins the ones that touch, so that inRanges can do a binary search. */
+function mergeRanges(ranges: readonly Range[]): Range[] {
+	const out: Range[] = [];
+	for (const r of [...ranges].sort((a, b) => a.start - b.start)) {
+		const last = out[out.length - 1];
+		if (last && r.start <= last.end) last.end = Math.max(last.end, r.end);
+		else out.push({ start: r.start, end: r.end });
+	}
+	return out;
+}
+
+/** True when pos is in one of the ranges. The ranges must come from mergeRanges. */
 function inRanges(pos: number, ranges: readonly Range[]): boolean {
-	return ranges.some((r) => pos >= r.start && pos < r.end);
+	let lo = 0;
+	let hi = ranges.length - 1;
+	while (lo <= hi) {
+		const mid = (lo + hi) >> 1;
+		const r = ranges[mid]!;
+		if (pos < r.start) hi = mid - 1;
+		else if (pos >= r.end) lo = mid + 1;
+		else return true;
+	}
+	return false;
 }
 
 function lineAt(starts: readonly number[], pos: number): number {
@@ -222,7 +247,7 @@ const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 export function findLinks(text: string, exclude: readonly Range[] = []): LinkRef[] {
 	if (text.length > MAX_TEXT) return [];
 	const fm = frontmatterEnd(text);
-	const skip = [...codeRanges(text, fm), ...exclude];
+	const skip = mergeRanges([...codeRanges(text, fm), ...exclude]);
 	const starts = lineStarts(text);
 	const out: LinkRef[] = [];
 	for (const m of text.matchAll(WIKI)) {
@@ -248,7 +273,7 @@ export function findLinks(text: string, exclude: readonly Range[] = []): LinkRef
 			line: lineAt(starts, start),
 		});
 	}
-	const wikiSpans: Range[] = out.map((l) => ({ start: l.start, end: l.end }));
+	const wikiSpans = mergeRanges(out.map((l) => ({ start: l.start, end: l.end })));
 	for (const m of text.matchAll(MD_OPEN)) {
 		const start = m.index;
 		if (start < fm || inRanges(start, skip) || inRanges(start, wikiSpans)) continue;

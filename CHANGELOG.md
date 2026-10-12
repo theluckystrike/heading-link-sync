@@ -1,5 +1,11 @@
 # heading-link-sync
 
+## 1.1.1
+
+### Patch Changes
+
+- 64b8518: Read long notes with much inline code in linear time, keep reference counts after a closed note changes on disk, and make the README and manifest claims match the code.
+
 ## 1.1.0
 
 ### Minor Changes

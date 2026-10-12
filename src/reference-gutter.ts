@@ -29,6 +29,11 @@ export class ReferenceMarker extends GutterMarker {
 export function referenceGutter(app: App, excluded: () => readonly string[], enabled: () => boolean): { extension: Extension; refresh: () => void; indexed: (path: string, text: string) => void } {
 	const live = new Set<EditorView>();
 	const indexedText = new Map<string, string>();
+	const fileOf = (view: EditorView) => view.state.field(editorInfoField, false)?.file;
+	// Drop the indexed text of a note that no editor shows. The note can change on disk while it is closed.
+	const forget = (path: string | undefined): void => {
+		if (path && ![...live].some((view) => fileOf(view)?.path === path)) indexedText.delete(path);
+	};
 	class Counts {
 		lines = new Map<number, number>();
 		constructor(readonly view: EditorView) {
@@ -41,14 +46,16 @@ export function referenceGutter(app: App, excluded: () => readonly string[], ena
 		}
 		update(update: ViewUpdate): void {
 			// Clear old line positions while the app indexes an edit.
-			if (update.startState.field(editorInfoField, false)?.file !== update.state.field(editorInfoField, false)?.file) this.read();
-			else if (update.docChanged) this.lines.clear();
+			const before = update.startState.field(editorInfoField, false)?.file;
+			if (before !== fileOf(this.view)) {
+				forget(before?.path);
+				this.read();
+			} else if (update.docChanged) this.lines.clear();
 			if (update.transactions.some((t) => t.effects.some((e) => e.is(refreshCounts)))) this.read();
 		}
 		destroy(): void {
 			live.delete(this.view);
-			const path = this.view.state.field(editorInfoField, false)?.file?.path;
-			if (path && ![...live].some((view) => view.state.field(editorInfoField, false)?.file?.path === path)) indexedText.delete(path);
+			forget(fileOf(this.view)?.path);
 		}
 	}
 	const counts = ViewPlugin.define((view) => new Counts(view));
@@ -63,7 +70,7 @@ export function referenceGutter(app: App, excluded: () => readonly string[], ena
 			lineMarkerChange: (update) => update.docChanged || update.startState.field(editorInfoField, false)?.file !== update.state.field(editorInfoField, false)?.file || update.transactions.some((t) => t.effects.some((e) => e.is(refreshCounts))),
 		})],
 		indexed: (path, text) => {
-			if ([...live].some((view) => view.state.field(editorInfoField, false)?.file?.path === path)) indexedText.set(path, text);
+			if ([...live].some((view) => fileOf(view)?.path === path)) indexedText.set(path, text);
 		},
 		refresh: () => {
 			for (const view of live) view.dispatch({ effects: refreshCounts.of(null) });

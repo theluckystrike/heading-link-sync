@@ -8,7 +8,7 @@ import { referenceGutter } from '../src/reference-gutter';
 const current = vi.hoisted(() => ({ file: null as unknown }));
 vi.mock('obsidian', async (original) => {
 	const { StateField } = await import('@codemirror/state');
-	return { ...await original<object>(), editorInfoField: StateField.define({ create: () => ({ file: current.file }), update: (value) => value }) };
+	return { ...await original<object>(), editorInfoField: StateField.define({ create: () => ({ file: current.file }), update: (value: { file: unknown }) => (value.file === current.file ? value : { file: current.file }) }) };
 });
 
 const views: EditorView[] = [];
@@ -31,7 +31,7 @@ function editor() {
 	views.push(view);
 	const counts = () => [...parent.querySelectorAll('.hls-reference-count')].map((el) => el.textContent);
 	const split = () => { const el = document.createElement('div'); document.body.append(el); const other = new EditorView({ state: EditorState.create({ doc: '# Setup', extensions: [editorInfoField, refs.extension] }), parent: el }); views.push(other); return other; };
-	return { refs, view, split, counts, setCount: (n: number) => { count = n; }, hide: () => { enabled = false; } };
+	return { app, file, refs, view, split, counts, setCount: (n: number) => { count = n; }, hide: () => { enabled = false; } };
 }
 
 describe('reference gutter lifetime', () => {
@@ -66,5 +66,16 @@ describe('reference gutter lifetime', () => {
 		view.dispatch({ changes: { from: 7, insert: ' ' } });
 		refs.refresh();
 		expect(counts()).toEqual([]);
+	});
+	it('forgets the indexed text when the editor leaves the note, so a later outside change does not hide the counts', () => {
+		const { app, file, refs, view, counts } = editor();
+		refs.indexed('Target.md', '# Setup');
+		// The same leaf opens another note. Then Target.md changes on disk (sync, or a link update) while it is closed.
+		current.file = app.vault.getFileByPath('Source.md');
+		view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: '[[Target#Setup]]' } });
+		refs.indexed('Target.md', '# Setup\nmore');
+		current.file = file;
+		view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: '# Setup\nmore' } });
+		expect(counts()).toEqual(['1']);
 	});
 });

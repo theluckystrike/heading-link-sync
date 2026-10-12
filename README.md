@@ -18,7 +18,7 @@ Leave the heading line or stop typing for 1.5 seconds. The plugin updates the li
 
 Undo restores changed links. If a link is no longer certain, Undo leaves that note alone and reports it. The command "Undo the last link update" does the same.
 
-### Every wikilink form follows
+### Wikilink forms that follow
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/linked-note.png" alt="A meeting note where an alias link, an embed and a property link now point to the new heading" width="720">
 
@@ -30,7 +30,7 @@ These forms are updated in the free version:
 - nested paths such as `[[Note#Milestones#Phase 1]]`
 - wikilinks in properties, such as `related: "[[Note#Heading]]"`
 
-Links in tables keep their escaped pipe. Links in fenced code, inline code and math blocks never change. The plugin finds the same links as the app does, and it compares heading text the same way: case and special characters such as `:` or `?` do not matter.
+Links in tables keep their escaped pipe. Links in fenced code, inline code and math blocks do not change. The plugin compares heading text the same way as the app: case and special characters such as `:` or `?` do not matter.
 
 ### Reference counts in the editor
 
@@ -44,7 +44,7 @@ Counts refresh after Obsidian indexes edits, renames or deletions. Old line posi
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/ask-first.png" alt="A dialog that asks Update links? with the old and new heading and the count of links and notes" width="720">
 
-Set "When a heading changes" to "Ask first" if you want to confirm each update. The dialog names the old and new heading and the number of links and notes. Skip leaves every note as it is.
+Set "When a heading changes" to "Ask first" if you want to confirm each update. The dialog names the old and new heading and the number of links and notes. Skip leaves the notes as they are.
 
 ### Markdown links (Pro)
 
@@ -56,7 +56,7 @@ Pro also updates `[text](Note.md#Heading)` links. It writes spaces as `%20`, as 
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/block-ids.png" alt="A status report where the link to a block now uses the new block ID costs" width="720">
 
-Edit a `^block-id` at the end of a paragraph or under a table, and Pro updates every `[[Note#^block-id]]` link and embed to it. Block IDs match in any letter case, as in the app.
+Edit a `^block-id` at the end of a paragraph or under a table, and Pro updates the `[[Note#^block-id]]` links and embeds to it. Block IDs match in any letter case, as in the app.
 
 ### Preview the changes (Pro)
 
@@ -70,7 +70,7 @@ The list shows the first 500 changes. If there are more, a line above the button
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/broken-links.png" alt="A report of broken heading and block links, each with the closest heading and a Fix button" width="720">
 
-The command "Find broken heading and block links" lists every link whose note exists but whose heading or block ID does not. For each one it suggests the closest heading or block ID in that note. Select Fix for one link, or "Fix all with a suggestion".
+The command "Find broken heading and block links" lists links whose note exists but whose heading or block ID does not. It shows up to 500. For each one it suggests the closest heading or block ID in that note. Select Fix for one link, or "Fix all with a suggestion" for the listed links.
 
 ## Install
 
@@ -87,7 +87,7 @@ It needs Obsidian 1.13.4 or newer. It was tested on desktop with Obsidian 1.13.4
 3. Move the cursor to another line, or stop typing for a moment.
 4. Read the notice. Select Undo if you did not want the change.
 
-The plugin acts only on edits that you make in the editor, not on changes from sync tools or git. A change of letter case alone is not a rename, because every link still works.
+The plugin acts on edits that you make in the editor. It ignores sync and git changes, unless you typed in that note in the last 5 seconds. A change of letter case alone is not a rename, because the links still work.
 
 ## Pro
 
@@ -132,7 +132,7 @@ A plain link goes to the first heading. Heading Link Sync follows the same rule.
 
 ### What does it leave alone?
 
-Links in code and math, links to a heading that does not exist, links with no safe path after the rename, and property links when the new text contains a quote mark.
+Links in code and math, links to a heading that does not exist, links with no safe path after the rename, property links when the new text contains a quote mark, and linking notes after the first 5,000.
 
 ## Payment, account and network
 

@@ -293,3 +293,13 @@ describe('encoding', () => {
 		expect(safeDecode('A%20B')).toBe('A B');
 	});
 });
+
+describe('large notes', () => {
+	it('reads a long paragraph with much inline code in linear time', () => {
+		// 2 MB list with no blank line: each inline code span used to search to the paragraph end again.
+		const list = '- item `code` and [[A#B]]\n'.repeat(80_000);
+		const start = performance.now();
+		expect(findLinks(list)).toHaveLength(80_000);
+		expect(performance.now() - start).toBeLessThan(2000);
+	});
+});
