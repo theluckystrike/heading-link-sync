@@ -65,3 +65,14 @@
 .hls-reference-count {
 	font-size: var(--font-smallest);
 }
+
+button.hls-reference-count {
+	padding: 0;
+	height: auto;
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	color: inherit;
+	line-height: inherit;
+	cursor: pointer;
+}

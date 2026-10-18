@@ -2,22 +2,26 @@ import { StateEffect, type Extension } from '@codemirror/state';
 import { GutterMarker, ViewPlugin, gutter, type EditorView, type ViewUpdate } from '@codemirror/view';
 import { editorInfoField, type App } from 'obsidian';
 import { referenceLines } from './references';
+import { ReferenceModal } from './reference-modal';
 
 const refreshCounts = StateEffect.define<null>();
 
 /** One count beside a heading or block ID. */
 export class ReferenceMarker extends GutterMarker {
 	elementClass = 'hls-reference-cell';
-	constructor(readonly count: number) {
+	constructor(readonly count: number, readonly path = '', readonly line = -1, private readonly open?: () => void) {
 		super();
 	}
 
 	eq(other: GutterMarker): boolean {
-		return other instanceof ReferenceMarker && other.count === this.count;
+		return other instanceof ReferenceMarker && other.count === this.count && other.path === this.path && other.line === this.line;
 	}
 
 	toDOM(): HTMLElement {
-		const label = createSpan({ cls: 'hls-reference-count', text: String(this.count) });
+		const label = createEl('button', { cls: 'hls-reference-count', text: String(this.count) });
+		// CodeMirror hides gutters from assistive technology. The command provides keyboard access.
+		label.tabIndex = -1;
+		label.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); this.open?.(); });
 		const hint = `${this.count} ${this.count === 1 ? 'link' : 'links'} to this heading or block ID`;
 		label.setAttribute('aria-label', hint);
 		label.setAttribute('title', hint);
@@ -65,7 +69,8 @@ export function referenceGutter(app: App, excluded: () => readonly string[], ena
 			lineMarker: (view, block) => {
 				const line = view.state.doc.lineAt(block.from).number - 1;
 				const count = view.plugin(counts)?.lines.get(line);
-				return count ? new ReferenceMarker(count) : null;
+				const file = fileOf(view);
+				return count && file ? new ReferenceMarker(count, file.path, line, () => new ReferenceModal(app, file, line, excluded()).open()) : null;
 			},
 			lineMarkerChange: (update) => update.docChanged || update.startState.field(editorInfoField, false)?.file !== update.state.field(editorInfoField, false)?.file || update.transactions.some((t) => t.effects.some((e) => e.is(refreshCounts))),
 		})],

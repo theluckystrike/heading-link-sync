@@ -2,9 +2,7 @@
 
 Heading Link Sync updates heading wikilinks when you retype a heading. Change `## Milestones` to `## Roadmap`, then leave the line. Links such as `[[Project Plan#Milestones]]` become `[[Project Plan#Roadmap]]`.
 
-The core heading and block rename commands open a dialog. Links do not follow a heading that you retype.
-
-Heading sync for wikilinks and embeds, and reference counts in the editor, are free. Pro adds Markdown links, block ID links, a preview of the changes and a report of broken heading links. Pro costs $5 a month or $15 once.
+Core rename commands use a dialog. Retyped headings leave broken links.
 
 ## Features
 
@@ -15,6 +13,8 @@ Heading sync for wikilinks and embeds, and reference counts in the editor, are f
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/rename-notice.png" alt="The plan note after a heading edit, with the notice Updated 36 links in 31 notes and an Undo button" width="720">
 
 Leave the heading line or stop typing for 1.5 seconds. The plugin updates the links and shows a count with an Undo button.
+
+Open linking notes use their editor text, so unsaved typing stays in place.
 
 Undo restores changed links. If a link is no longer certain, Undo leaves that note alone and reports it. The command "Undo the last link update" does the same.
 
@@ -39,6 +39,10 @@ Links in tables keep their escaped pipe. Links in fenced code, inline code and m
 A number beside a heading or block ID shows how many links point to it. The count includes wikilinks, Markdown links, embeds, property links and links inside the same note. Counts are per link. Unreferenced text has no number.
 
 Counts refresh after Obsidian indexes edits, renames or deletions. Old line positions clear while you type. A nested path counts for its last heading. A plain link to a duplicate heading counts for the first match, as it does in Obsidian. Broken subpaths and links from excluded folders do not count. Counts are free, including those for Markdown links and block IDs. Turn off "Show reference counts" to hide them.
+
+Select a count to open its source list. Each row shows the source note and line, or a property label. Select the note button to open that source. The list uses the current app index. It shows up to 500 links and gives the number not shown. This action is free. For keyboard access, use "Show links to this heading or block" on its line.
+
+<img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/reference-list.png" alt="A list of source notes for a heading reference count" width="720">
 
 ### Ask first
 
@@ -113,10 +117,6 @@ To enable Pro:
 Notes in an excluded folder are never changed, and heading edits in them do not update other notes.
 
 ## FAQ
-
-### How is this different from "Rename this heading"?
-
-The core command opens a dialog before the edit. This plugin follows typing. If you use the core dialog, links already point to the new text.
 
 ### What if I stop typing in the middle of a word?
 

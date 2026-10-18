@@ -1,5 +1,19 @@
 # heading-link-sync
 
+## 1.2.0
+
+### Minor Changes
+
+- e12e894: Open a free source list from a heading or block reference count. Preserve unsaved text when updating links in open notes.
+
+### Patch Changes
+
+
+## 1.1.3
+
+### Patch Changes
+
+
 ## 1.1.2
 
 ### Patch Changes

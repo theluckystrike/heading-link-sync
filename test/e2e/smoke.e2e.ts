@@ -9,6 +9,6 @@ describe(`${pluginId} smoke test`, function () {
 
 	it('registers its commands', async function () {
 		const ids = await browser.executeObsidian(({ app }) => Object.keys((app as unknown as { commands: { commands: Record<string, unknown> } }).commands.commands).filter((id) => id.startsWith('heading-link-sync:')).sort());
-		expect(ids).toEqual(['heading-link-sync:find-broken-links', 'heading-link-sync:undo-last-update']);
+		expect(ids).toEqual(['heading-link-sync:find-broken-links', 'heading-link-sync:show-references', 'heading-link-sync:undo-last-update']);
 	});
 });

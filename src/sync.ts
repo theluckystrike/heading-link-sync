@@ -93,7 +93,7 @@ function planOne(app: App, req: SyncRequest, file: TFile, text: string, exclude:
 export async function planVault(app: App, req: SyncRequest): Promise<FilePlan[]> {
 	const plans: FilePlan[] = [];
 	for (const file of linkingNotes(app, req.target, req.excluded)) {
-		const view = file.path === req.target.path ? editorFor(app, file) : null;
+		const view = editorFor(app, file);
 		const text = view ? view.editor.getValue() : await app.vault.cachedRead(file);
 		const exclude = view ? [] : cacheExclusions(app.metadataCache.getFileCache(file));
 		const { edits, skipped } = planOne(app, req, file, text, exclude);
@@ -107,7 +107,7 @@ export async function applyPlans(app: App, req: SyncRequest, plans: readonly Fil
 	const done: AppliedFile[] = [];
 	for (const plan of plans) {
 		if (plan.edits.length === 0) continue;
-		const view = plan.file.path === req.target.path ? editorFor(app, plan.file) : null;
+		const view = editorFor(app, plan.file);
 		if (view) {
 			const editor = view.editor;
 			const text = editor.getValue();

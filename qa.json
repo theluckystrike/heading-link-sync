@@ -85,5 +85,13 @@
 		"note": "Reference Counts.md",
 		"eval": "(async () => { const p = app.plugins.plugins['heading-link-sync']; p.settings.referenceCounts = true; p.settings.excludedFolders = 'Heading Link Sync/Templates'; await p.saveSettings(); p.pro.signOut(); await app.workspace.getLeaf(false).openFile(app.vault.getFileByPath('Heading Link Sync/Reference Counts.md'), { state: { mode: 'source', source: true } }); })()",
 		"wait": 2500
+	},
+	{
+		"feature": "reference-list",
+		"caption": "Select a reference count to list the source notes.",
+		"note": "Reference Counts.md",
+		"eval": "(async () => { const p = app.plugins.plugins['heading-link-sync']; p.pro.signOut(); p.settings.referenceCounts = true; await p.saveSettings(); await app.workspace.getLeaf(false).openFile(app.vault.getFileByPath('Heading Link Sync/Reference Counts.md'), { state: { mode: 'source', source: true } }); await new Promise(r => setTimeout(r, 2000)); const b = document.querySelector('.workspace-leaf.mod-active button.hls-reference-count'); if (!b) throw new Error('Missing reference count'); b.click(); })()",
+		"wait": 700,
+		"after": "document.querySelector('.modal-close-button')?.click(); 'ok'"
 	}
 ]

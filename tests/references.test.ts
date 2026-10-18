@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from 'obsidian-test-mocks/obsidian';
-import { referenceLines } from '../src/references';
+import { referenceLines, referencesAtLine } from '../src/references';
 import { ReferenceMarker } from '../src/reference-gutter';
+import { ReferenceModal } from '../src/reference-modal';
 import { normalizeSettings } from '../src/settings';
 
 const position = (line: number) => ({ start: { line, col: 0, offset: line * 20 }, end: { line, col: 10, offset: line * 20 + 10 } });
@@ -64,5 +65,57 @@ describe('reference marker', () => {
 		expect(normalizeSettings(null).referenceCounts).toBe(true);
 		expect(normalizeSettings({ referenceCounts: false }).referenceCounts).toBe(false);
 		expect(normalizeSettings({ referenceCounts: 'yes' as never }).referenceCounts).toBe(true);
+	});
+});
+
+
+describe('reference source list', () => {
+	it('lists the same sources as the count, including embeds, properties and same-note links', () => {
+		const { app, target, read } = fixture();
+		const refs = referencesAtLine(app as never, target as never, 1, ['Ignore']);
+		expect(refs).toHaveLength(4);
+		expect(refs.map((r) => r.source.path)).toEqual(['Folder/Target.md', 'Source.md', 'Source.md', 'Source.md']);
+		expect(refs.map((r) => r.line)).toEqual([0, 0, 0, -1]);
+		expect(referencesAtLine(app as never, target as never, 3, ['Ignore']).map((r) => r.subpath)).toEqual(['#B#Notes']);
+		expect(referencesAtLine(app as never, target as never, 4, []).map((r) => r.subpath)).toEqual(['#^ABC']);
+		expect(referencesAtLine(app as never, target as never, 99, [])).toEqual([]);
+		expect(referencesAtLine(app as never, target as never, 1, ['Folder'])).toEqual([]);
+		expect(read).not.toHaveBeenCalled();
+	});
+	it('opens the source note from a list button', () => {
+		const { app, target } = fixture();
+		const openFile = vi.fn().mockResolvedValue(undefined);
+		vi.spyOn(app.workspace, 'getLeaf').mockReturnValue({ openFile } as never);
+		const modal = new ReferenceModal(app as never, target as never, 3, []);
+		modal.onOpen();
+		expect(modal.contentEl.textContent).toContain('1 link in the app index.');
+		modal.contentEl.querySelector('button')!.click();
+		expect(openFile).toHaveBeenCalledWith(app.vault.getFileByPath('Source.md'), { eState: { line: 0 } });
+	});
+	it('makes a clickable marker and keeps the destination in marker equality', () => {
+		const open = vi.fn();
+		const marker = new ReferenceMarker(2, 'Target.md', 3, open);
+		const button = marker.toDOM();
+		expect(button.tagName).toBe('BUTTON');
+		expect(button.tabIndex).toBe(-1);
+		button.click();
+		expect(open).toHaveBeenCalledOnce();
+		expect(marker.eq(new ReferenceMarker(2, 'Other.md', 3))).toBe(false);
+		expect(marker.eq(new ReferenceMarker(2, 'Target.md', 4))).toBe(false);
+	});
+});
+
+
+describe('large reference list', () => {
+	it('shows the limit and the omitted count without hiding that more links exist', () => {
+		const { app, target } = fixture();
+		vi.mocked(app.metadataCache.getFileCache).mockImplementation((file) => file.path === target.path
+			? { headings: [heading('Notes', 2, 1)] } as never
+			: { links: Array.from({ length: 501 }, () => link('Target#Notes')) } as never);
+		const modal = new ReferenceModal(app as never, target as never, 1, ['Ignore']);
+		modal.onOpen();
+		expect(modal.contentEl.querySelectorAll('button')).toHaveLength(500);
+		expect(modal.contentEl.textContent).toContain('501 links in the app index.');
+		expect(modal.contentEl.textContent).toContain('Showing the first 500 links. 1 link is not shown.');
 	});
 });

@@ -8,6 +8,7 @@ import { DEFAULT_SETTINGS, excludedList, HeadingLinkSyncSettingTab, isExcluded, 
 import { applyPlans, findBroken, fixBroken, planVault, undoApplied, type AppliedFile, type FilePlan, type SyncRequest } from './sync';
 import { HeadingWatcher, type Snapshot } from './watch';
 import { referenceGutter } from './reference-gutter';
+import { ReferenceModal } from './reference-modal';
 
 const NOTICE_MS = 10_000;
 /** How many note names the undo notice lists. */
@@ -80,6 +81,13 @@ export default class HeadingLinkSyncPlugin extends Plugin {
 				if (this.lastApplied.length === 0) return false;
 				if (!checking) void this.undo();
 				return true;
+			},
+		});
+		this.addCommand({
+			id: 'show-references',
+			name: 'Show links to this heading or block',
+			editorCallback: (editor, info) => {
+				if (info.file) new ReferenceModal(this.app, info.file, editor.getCursor().line, excludedList(this.settings)).open();
 			},
 		});
 		this.addCommand({
