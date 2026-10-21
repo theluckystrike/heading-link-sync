@@ -38,7 +38,7 @@ Links in tables keep their escaped pipe. Links in fenced code, inline code and m
 
 A number beside a heading or block ID shows how many links point to it. The count includes wikilinks, Markdown links, embeds, property links and links inside the same note. Counts are per link. Unreferenced text has no number.
 
-Counts refresh after Obsidian indexes edits, renames or deletions. Old line positions clear while you type. A nested path counts for its last heading. A plain link to a duplicate heading counts for the first match, as it does in Obsidian. Broken subpaths and links from excluded folders do not count. Counts are free, including those for Markdown links and block IDs. Turn off "Show reference counts" to hide them.
+Counts refresh after Obsidian indexes edits, renames or deletions. Old line positions clear while you type. A nested path counts for its last heading. A plain link to a duplicate heading counts for the first match, as it does in Obsidian. Broken subpaths and links from excluded folders do not count. Counts are free, including those for Markdown links and block IDs.
 
 Select a count to open its source list. Each row shows the source note and line, or a property label. Select the note button to open that source. The list uses the current app index. It shows up to 500 links and gives the number not shown. This action is free. For keyboard access, use "Show links to this heading or block" on its line.
 
@@ -78,7 +78,7 @@ The command "Find broken heading and block links" lists links whose note exists 
 
 ## Install
 
-After the community listing goes live, open Settings, Community plugins, Browse. Search for "Heading Link Sync". Select Install, then Enable.
+Open Settings, Community plugins, Browse. Search for "Heading Link Sync". Select Install, then Enable.
 
 To install by hand, download `main.js`, `manifest.json` and `styles.css` from the latest release. Put them in `<vault>/.obsidian/plugins/heading-link-sync/`. Reload the list of community plugins, then turn on Heading Link Sync.
 
@@ -89,7 +89,6 @@ It needs Obsidian 1.13.4 or newer. It was tested on desktop with Obsidian 1.13.4
 1. Turn on the plugin.
 2. Open a note that other notes link to, and type over the text of one of its headings.
 3. Move the cursor to another line, or stop typing for a moment.
-4. Read the notice. Select Undo if you did not want the change.
 
 The plugin acts on edits that you make in the editor. It ignores sync and git changes, unless you typed in that note in the last 5 seconds. A change of letter case alone is not a rename, because the links still work.
 
@@ -102,6 +101,8 @@ To enable Pro:
 3. The plugin copies a code and opens github.com/login/device. Paste the code there and approve.
 
 ## Settings
+
+After a minor or major update, this plugin opens one What's new tab in the background. The tab and settings card suggest other NoteMods plugins and Zovo Chat and link to notemods.com for feedback ([privacy](https://notemods.com/privacy/)). The tab sends no data. Turn the tab off in Settings.
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/settings.png" alt="Settings with the Pro section, the reference count switch, the update mode, the pause and excluded folders" width="720">
 
@@ -128,11 +129,11 @@ It reads the edited note and its linking notes, and writes only the changed part
 
 ### What happens with two headings of the same text?
 
-A plain link goes to the first heading. Heading Link Sync follows the same rule. If you rename the second heading, only nested links that point to it change. If a rename would send an old link to a different heading, the plugin adds the parent heading to the link, for example `[[Note#Part B#Notes]]`. If no such path exists, it leaves the link alone and says so.
+A plain link goes to the first heading. If you rename the second heading, only nested links that point to it change. If a rename would send an old link to a different heading, the plugin adds the parent heading to the link, for example `[[Note#Part B#Notes]]`. If no such path exists, it leaves the link alone and says so.
 
 ### What does it leave alone?
 
-Links in code and math, links to a heading that does not exist, links with no safe path after the rename, property links when the new text contains a quote mark, and linking notes after the first 5,000.
+Links to a heading that does not exist, links with no safe path after the rename, property links when the new text contains a quote mark, and linking notes after the first 5,000.
 
 ## Payment, account and network
 
@@ -148,7 +149,7 @@ After a successful check, Pro can work offline for up to 14 days. Sign out or a 
 
 ## Support
 
-Report bugs and feature requests in this repository's issue tracker. Include your Obsidian version, the old and new heading, and one link that did not update.
+When you report a bug, include your Obsidian version, the old and new heading, and one link that did not update.
 
 To build from source:
 
@@ -157,8 +158,6 @@ npm ci
 npm run build
 npm test
 ```
-
-The tests check 59 golden cases for link rules and reference counts. An end-to-end test types a new heading in Obsidian and checks the text of 31 linking notes.
 
 ## License
 

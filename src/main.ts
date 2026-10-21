@@ -9,6 +9,8 @@ import { applyPlans, findBroken, fixBroken, planVault, undoApplied, type Applied
 import { HeadingWatcher, type Snapshot } from './watch';
 import { referenceGutter } from './reference-gutter';
 import { ReferenceModal } from './reference-modal';
+import { setupHello } from './hello/index';
+import WHATS_NEW from './whats-new.json';
 
 const NOTICE_MS = 10_000;
 /** How many note names the undo notice lists. */
@@ -35,6 +37,8 @@ export default class HeadingLinkSyncPlugin extends Plugin {
 	private refreshReferences: (() => void) | null = null;
 
 	async onload(): Promise<void> {
+		// First: "What's new" reads its state before the settings load (packages/hello). It does not wait.
+		setupHello(this, WHATS_NEW);
 		await this.loadSettings();
 		// No request here: a request needs a GitHub sign in first (Settings, Pro, Sign in with GitHub).
 		const pro = createGitHubSponsors(this.app, this.manifest.id, SPONSORS, this);

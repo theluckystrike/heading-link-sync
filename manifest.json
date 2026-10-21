@@ -1,7 +1,7 @@
 {
 	"id": "heading-link-sync",
 	"name": "Heading Link Sync",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"minAppVersion": "1.13.4",
 	"description": "Updates wikilinks and embeds to a heading when you edit the heading text in the editor, with no rename dialog. Pro adds Markdown and block ID links.",
 	"author": "Michael Lip",
