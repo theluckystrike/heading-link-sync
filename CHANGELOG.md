@@ -1,5 +1,11 @@
 # heading-link-sync
 
+## 1.3.1
+
+### Patch Changes
+
+- The Pro notice for the broken link report now has a Sponsor on GitHub button.
+
 ## 1.3.0
 
 ### Minor Changes
