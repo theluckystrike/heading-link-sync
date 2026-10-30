@@ -96,7 +96,7 @@ The plugin acts on edits that you make in the editor. It ignores sync and git ch
 
 To enable Pro:
 
-1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike) with $5 a month, or $15 once.
+1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike?metadata_source=heading-link-sync) with $5 a month, or $15 once.
 2. In Obsidian, open the settings of Heading Link Sync and select "Sign in with GitHub".
 3. The plugin copies a code and opens github.com/login/device. Paste the code there and approve.
 

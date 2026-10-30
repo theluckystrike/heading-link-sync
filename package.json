@@ -1,6 +1,6 @@
 {
 	"name": "heading-link-sync",
-	"version": "1.3.1",
+	"version": "1.3.2",
 	"private": true,
 	"description": "Updates wikilinks and embeds to a heading when you edit the heading text in the editor, with no rename dialog. Pro adds Markdown and block ID links.",
 	"main": "main.js",
