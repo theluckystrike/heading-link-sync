@@ -4,6 +4,18 @@ Heading Link Sync updates heading wikilinks when you retype a heading. Change `#
 
 Core rename commands use a dialog. Retyped headings leave broken links.
 
+## Quick start
+
+Paste this:
+
+```markdown
+## Milestones
+
+See [[#Milestones]].
+```
+
+Change `## Milestones` to `## Roadmap`, then leave the line. Links such as `[[Project Plan#Milestones]]` become `[[Project Plan#Roadmap]]`.
+
 ## Features
 
 <img src="https://raw.githubusercontent.com/theluckystrike/heading-link-sync/HEAD/docs/heading-link-sync.gif" alt="Typing a new heading text, then a meeting note that shows the updated link" width="720">
@@ -96,7 +108,7 @@ The plugin acts on edits that you make in the editor. It ignores sync and git ch
 
 To enable Pro:
 
-1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike?metadata_source=heading-link-sync) with $5 a month, or $15 once.
+1. Sponsor [theluckystrike on GitHub Sponsors](https://github.com/sponsors/theluckystrike?frequency=one-time&metadata_source=heading-link-sync) with $5 a month, or $15 once.
 2. In Obsidian, open the settings of Heading Link Sync and select "Sign in with GitHub".
 3. The plugin copies a code and opens github.com/login/device. Paste the code there and approve.
 
@@ -139,7 +151,7 @@ Links to a heading that does not exist, links with no safe path after the rename
 
 The core features are free. Pro features need a GitHub Sponsors sponsorship of theluckystrike: $5 a month or more, or $15 once. A total payment of $15 meets the payment requirement for Pro without further payment. Sign-in and the checks below still apply. Your notes stay readable and editable with or without Pro.
 
-GitHub handles the payment. Sponsor at https://github.com/sponsors/theluckystrike. You need no account for the free features. Pro needs the GitHub account that sponsors.
+GitHub handles the payment. Sponsor at https://github.com/sponsors/theluckystrike?frequency=one-time&metadata_source=heading-link-sync. You need no account for the free features. Pro needs the GitHub account that sponsors.
 
 Until you select "Sign in with GitHub" in the settings, Heading Link Sync makes no network requests. Sign in uses the GitHub device flow. Heading Link Sync sends its public client ID and the scope `read:user` to `https://github.com/login/device/code` and shows you a code. While you enter the code at https://github.com/login/device, it asks `https://github.com/login/oauth/access_token` every few seconds to check the sign-in status. The scope permits profile reads only. GitHub needs this access to show the sponsorship tier. It grants no repository scope and no write access.
 
