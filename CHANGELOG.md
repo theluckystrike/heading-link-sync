@@ -1,5 +1,11 @@
 # heading-link-sync
 
+## 1.3.3
+
+### Patch Changes
+
+- 371e979: The Pro notice of Heading Link Sync now says that one payment turns on Pro in every NoteMods plugin.
+
 ## 1.3.2
 
 ### Patch Changes

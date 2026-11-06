@@ -25,6 +25,7 @@ import {
 	undoRecord,
 	type Heading,
 } from '../src/links';
+import { GROWTH_LIMIT, growth } from './growth';
 
 const h = (text: string, level = 2): Heading => ({ text, level });
 
@@ -297,9 +298,13 @@ describe('encoding', () => {
 describe('large notes', () => {
 	it('reads a long paragraph with much inline code in linear time', () => {
 		// 2 MB list with no blank line: each inline code span used to search to the paragraph end again.
-		const list = '- item `code` and [[A#B]]\n'.repeat(80_000);
-		const start = performance.now();
-		expect(findLinks(list)).toHaveLength(80_000);
-		expect(performance.now() - start).toBeLessThan(20000);
+		const listOf = (n: number) => '- item `code` and [[A#B]]\n'.repeat(n);
+		expect(findLinks(listOf(80_000))).toHaveLength(80_000);
+		// Growth guard: 80,000 lines against 8,000 lines, both timed in this test (tests/growth.ts).
+		const g = growth((n) => {
+			const list = listOf(n);
+			return () => findLinks(list);
+		}, 80_000);
+		expect(g.ratio, g.text).toBeLessThan(GROWTH_LIMIT);
 	});
 });
