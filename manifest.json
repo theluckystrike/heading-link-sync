@@ -1,7 +1,7 @@
 {
 	"id": "heading-link-sync",
 	"name": "Heading Link Sync",
-	"version": "1.3.3",
+	"version": "1.3.4",
 	"minAppVersion": "1.13.4",
 	"description": "Update links and embeds to a heading when you rename the heading text in the editor, with no rename dialog. Pro adds Markdown and block ID links.",
 	"author": "Michael Lip",

@@ -1,5 +1,11 @@
 # heading-link-sync
 
+## 1.3.4
+
+### Patch Changes
+
+- The Sponsor button now opens the NoteMods one-time tier.
+
 ## 1.3.3
 
 ### Patch Changes
